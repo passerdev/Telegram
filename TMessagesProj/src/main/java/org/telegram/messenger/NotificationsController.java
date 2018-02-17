@@ -1760,7 +1760,7 @@ public class NotificationsController {
 
             String name;
             boolean replace = true;
-            if ((int) dialog_id == 0 || pushDialogs.size() > 1 || AndroidUtilities.needShowPasscode(false) || UserConfig.isWaitingForPasscodeEnter) {
+            if ((int) dialog_id == 0) {
                 name = LocaleController.getString("AppName", R.string.AppName);
                 replace = false;
             } else {

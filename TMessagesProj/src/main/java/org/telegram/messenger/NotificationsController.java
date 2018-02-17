@@ -11,6 +11,7 @@ package org.telegram.messenger;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -1939,6 +1940,16 @@ public class NotificationsController {
         }
     }
 
+    class NotificationWithId {
+        public Notification notification;
+        public Integer id;
+
+        public NotificationWithId(Integer id, Notification notification) {
+            this.id = id;
+            this.notification = notification;
+        }
+    }
+
     @SuppressLint("InlinedApi")
     private void showExtraNotifications(NotificationCompat.Builder notificationBuilder, boolean notifyAboutLast) {
         if (Build.VERSION.SDK_INT < 18) {
@@ -1967,6 +1978,8 @@ public class NotificationsController {
         oldIdsWear.putAll(wearNotificationsIds);
         wearNotificationsIds.clear();
 
+        ArrayList<NotificationWithId> notificationsList = new ArrayList<>();
+
         for (int b = 0; b < sortedDialogs.size(); b++) {
             long dialog_id = sortedDialogs.get(b);
             ArrayList<MessageObject> messageObjects = messagesByDialogs.get(dialog_id);
@@ -1987,24 +2000,22 @@ public class NotificationsController {
                 }
             }
             TLRPC.FileLocation photoPath = null;
-            if (AndroidUtilities.needShowPasscode(false) || UserConfig.isWaitingForPasscodeEnter) {
-                name = LocaleController.getString("AppName", R.string.AppName);
+
+            if (chat != null) {
+                name = chat.title;
             } else {
-                if (chat != null) {
-                    name = chat.title;
-                } else {
-                    name = UserObject.getUserName(user);
+                name = UserObject.getUserName(user);
+            }
+            if (chat != null) {
+                if (chat.photo != null && chat.photo.photo_small != null && chat.photo.photo_small.volume_id != 0 && chat.photo.photo_small.local_id != 0) {
+                    photoPath = chat.photo.photo_small;
                 }
-                if (chat != null) {
-                    if (chat.photo != null && chat.photo.photo_small != null && chat.photo.photo_small.volume_id != 0 && chat.photo.photo_small.local_id != 0) {
-                        photoPath = chat.photo.photo_small;
-                    }
-                } else {
-                    if (user.photo != null && user.photo.photo_small != null && user.photo.photo_small.volume_id != 0 && user.photo.photo_small.local_id != 0) {
-                        photoPath = user.photo.photo_small;
-                    }
+            } else {
+                if (user.photo != null && user.photo.photo_small != null && user.photo.photo_small.volume_id != 0 && user.photo.photo_small.local_id != 0) {
+                    photoPath = user.photo.photo_small;
                 }
             }
+
 
             Integer notificationId = oldIdsWear.get(dialog_id);
             if (notificationId == null) {
@@ -2149,8 +2160,14 @@ public class NotificationsController {
                 builder.addPerson("tel:+" + user.phone);
             }
 
-            notificationManager.notify(notificationId, builder.build());
+//            notificationManager.notify(notificationId, builder.build());
+            notificationsList.add(new NotificationWithId(notificationId, builder.build()));
             wearNotificationsIds.put(dialog_id, notificationId);
+        }
+
+        if (notificationsList.size() > 0) {
+            NotificationWithId notification = notificationsList.get(notificationsList.size() - 1);
+            notificationManager.notify(notification.id, notification.notification);
         }
 
         for (HashMap.Entry<Long, Integer> entry : oldIdsWear.entrySet()) {

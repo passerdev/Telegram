@@ -2463,12 +2463,14 @@ public class NotificationsController {
             } else {
                 chatName = UserObject.getUserName(user);
             }
-            if ((int) dialog_id == 0 || pushDialogs.size() > 1 || AndroidUtilities.needShowPasscode(false) || SharedConfig.isWaitingForPasscodeEnter) {
-                name = LocaleController.getString("AppName", R.string.AppName);
-                replace = false;
-            } else {
-                name = chatName;
-            }
+
+//            if ((int) dialog_id == 0 || pushDialogs.size() > 1 || AndroidUtilities.needShowPasscode(false) || SharedConfig.isWaitingForPasscodeEnter) {
+//                name = LocaleController.getString("AppName", R.string.AppName);
+//                replace = false;
+//            } else {
+//                name = chatName;
+//            }
+            name = chatName;
 
             String detailText;
             if (UserConfig.getActivatedAccountsCount() > 1) {
@@ -2712,7 +2714,7 @@ public class NotificationsController {
     @SuppressLint("InlinedApi")
     private void showExtraNotifications(NotificationCompat.Builder notificationBuilder, boolean notifyAboutLast, String summary) {
         Notification mainNotification = notificationBuilder.build();
-        if (Build.VERSION.SDK_INT < 18) {
+        if (Build.VERSION.SDK_INT < 18 || true) {
             notificationManager.notify(notificationId, mainNotification);
             return;
         }
@@ -2844,9 +2846,9 @@ public class NotificationsController {
             }
 
             if (AndroidUtilities.needShowPasscode(false) || SharedConfig.isWaitingForPasscodeEnter) {
-                name = LocaleController.getString("AppName", R.string.AppName);
-                photoPath = null;
-                canReply = false;
+//                name = LocaleController.getString("AppName", R.string.AppName);
+//                photoPath = null;
+//                canReply = false;
             }
 
             NotificationCompat.CarExtender.UnreadConversation.Builder unreadConvBuilder = new NotificationCompat.CarExtender.UnreadConversation.Builder(name).setLatestTimestamp((long) max_date * 1000);
